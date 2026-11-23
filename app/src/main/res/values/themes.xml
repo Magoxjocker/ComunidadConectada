@@ -1,0 +1,26 @@
+<resources>
+    <style name="Theme.Comunidad" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/petroleum</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/highlight</item>
+        <item name="colorOnPrimaryContainer">@color/on_highlight</item>
+        <item name="colorSecondaryContainer">@color/highlight</item>
+        <item name="colorOnSecondaryContainer">@color/on_highlight</item>
+        <item name="colorSecondary">@color/navy</item>
+        <item name="colorSurface">@color/panel</item>
+        <item name="colorSurfaceContainer">@color/panel</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="colorOnSurfaceVariant">@color/muted</item>
+        <item name="colorError">@color/danger</item>
+        <item name="colorOnError">@color/on_error</item>
+        <item name="android:colorBackground">@color/canvas</item>
+        <item name="android:windowBackground">@color/canvas</item>
+    </style>
+    <style name="Theme.Comunidad.HighContrast">
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/ink</item>
+        <item name="colorOnSurfaceVariant">@color/ink</item>
+        <item name="colorOutline">@color/ink</item>
+        <item name="colorOutlineVariant">@color/ink</item>
+    </style>
+</resources>

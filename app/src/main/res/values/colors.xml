@@ -1,0 +1,14 @@
+<resources>
+    <color name="petroleum">#176B5B</color>
+    <color name="navy">#17324D</color>
+    <color name="canvas">#F7F9FA</color>
+    <color name="panel">#FFFFFF</color>
+    <color name="ink">#17212B</color>
+    <color name="muted">#475866</color>
+    <color name="danger">#B42318</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="warning">#946200</color>
+    <color name="highlight">#D7EFE7</color>
+    <color name="on_highlight">#113C34</color>
+    <color name="on_primary">#FFFFFF</color>
+</resources>

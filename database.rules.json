@@ -1,0 +1,427 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "accounts": {
+      "$uid": {
+        ".read": "((auth != null) && (auth.token.email_verified === true)) && (auth.uid === $uid)",
+        ".write": "(auth != null) && (auth.uid === $uid) && (auth.token.email != null) && (!data.exists()) && (newData.exists()) && (newData.child('community').val() === '') && (newData.child('role').val() === 'neighbor')",
+        ".validate": "(newData.hasChildren(['name','unit','community','role']))",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)",
+          ".write": "(((auth != null) && (auth.token.email_verified === true)) && (auth.uid === $uid)) && (((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === data.parent().child('community').val()) && (root.child('communityData').child(data.parent().child('community').val()).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child(data.parent().child('community').val()).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (data.exists()) && (newData.exists()) && (newData.val() === newData.parent().parent().parent().child('communityData').child(data.parent().child('community').val()).child('members').child($uid).child('name').val())"
+        },
+        "unit": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+        },
+        "community": {
+          ".validate": "(newData.val() === '') || (newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,120}$/))",
+          ".write": "((root.child('accounts').child($uid).child('role').val() === 'neighbor') && (root.child('accounts').child($uid).child('community').val() === '')) && (newData.isString()) && ((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === newData.val()) && (root.child('communityData').child(newData.val()).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child(newData.val()).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === newData.val()) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (root.child('joinRequests').child($uid).child('community').val() === newData.val()) && (!root.child('communityData').child(newData.val()).child('members').child($uid).exists()) && (newData.parent().parent().parent().child('communityData').child(newData.val()).child('members').child($uid).exists())"
+        },
+        "role": {
+          ".validate": "(newData.val() === 'neighbor') || (newData.val() === 'admin')"
+        },
+        "$extra": {
+          ".validate": false
+        }
+      }
+    },
+    "joinRequests": {
+      "$uid": {
+        ".read": "(((auth != null) && (auth.token.email_verified === true)) && (auth.uid === $uid)) || ((data.exists()) && ((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === data.child('community').val()) && (root.child('communityData').child(data.child('community').val()).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child(data.child('community').val()).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === data.child('community').val()) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')))",
+        ".write": "(((auth != null) && (auth.token.email_verified === true)) && (auth.uid === $uid)) && ((root.child('accounts').child($uid).child('role').val() === 'neighbor') && (root.child('accounts').child($uid).child('community').val() === '')) && (newData.exists()) && (root.child('communityData').child(newData.child('community').val()).child('members').exists()) && (newData.child('name').val() === root.child('accounts').child($uid).child('name').val()) && (newData.child('unit').val() === root.child('accounts').child($uid).child('unit').val()) && (newData.child('email').val() === auth.token.email)",
+        ".validate": "(newData.hasChildren(['community','name','unit','email']))",
+        "community": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,120}$/)"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+        },
+        "unit": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 254 && !newData.val().matches(/^ *$/)"
+        },
+        "$extra": {
+          ".validate": false
+        }
+      }
+    },
+    "mqttAccess": {
+      "$uid": {
+        ".read": "(((auth != null) && (auth.token.email_verified === true)) && (auth.uid === $uid)) && (((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === root.child('accounts').child(auth.uid).child('community').val()) && (root.child('communityData').child(root.child('accounts').child(auth.uid).child('community').val()).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child(root.child('accounts').child(auth.uid).child('community').val()).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (!data.exists() || data.child('community').val() === root.child('accounts').child(auth.uid).child('community').val())"
+      }
+    },
+    "communityData": {
+      "$community": {
+        "metadata": {
+          "displayName": {
+            ".read": "((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())"
+          }
+        },
+        "members": {
+          ".read": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (query.orderByKey) && ((query.limitToLast != null && query.limitToLast <= 100) || (query.limitToFirst != null && query.limitToFirst <= 100))",
+          "$uid": {
+            ".read": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) || ((((auth != null) && (auth.token.email_verified === true)) && (auth.uid === $uid)) && (root.child('accounts').child($uid).child('community').val() === $community))",
+            ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && ((root.child('accounts').child($uid).child('role').val() === 'neighbor') && (root.child('accounts').child($uid).child('community').val() === '')) && (!data.exists()) && (newData.exists()) && (root.child('joinRequests').child($uid).child('community').val() === $community) && (root.child('joinRequests').child($uid).child('name').val() === root.child('accounts').child($uid).child('name').val()) && (root.child('joinRequests').child($uid).child('unit').val() === root.child('accounts').child($uid).child('unit').val()) && (newData.parent().parent().parent().parent().child('accounts').child($uid).child('community').val() === $community) && (newData.child('role').val() === 'neighbor') && (newData.child('active').val() === true) && (newData.child('name').val() === root.child('joinRequests').child($uid).child('name').val()) && (newData.child('unit').val() === root.child('joinRequests').child($uid).child('unit').val()) && (newData.child('email').val() === root.child('joinRequests').child($uid).child('email').val())",
+            ".validate": "(newData.hasChildren(['name','unit','email','role','active']))",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)",
+              ".write": "(((auth != null) && (auth.token.email_verified === true)) && (auth.uid === $uid)) && (((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (data.exists()) && (newData.exists()) && (newData.val() === newData.parent().parent().parent().parent().parent().child('accounts').child($uid).child('name').val())"
+            },
+            "unit": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+            },
+            "email": {
+              ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 254 && !newData.val().matches(/^ *$/)"
+            },
+            "role": {
+              ".validate": "(newData.val() === 'neighbor') || (newData.val() === 'admin')"
+            },
+            "active": {
+              ".validate": "newData.isBoolean()",
+              ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (data.exists()) && (newData.isBoolean()) && (data.parent().child('role').val() === 'neighbor') && (root.child('accounts').child($uid).child('role').val() === 'neighbor') && (root.child('accounts').child($uid).child('community').val() === $community)"
+            },
+            "$extra": {
+              ".validate": false
+            }
+          }
+        },
+        "messages": {
+          ".read": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((query.orderByChild === 'createdAt') && (query.limitToLast != null && query.limitToLast <= 100))",
+          ".indexOn": [
+            "createdAt"
+          ],
+          "$record": {
+            ".read": "((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())",
+            ".write": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((!data.exists()) && (newData.exists()) && ($record.beginsWith(auth.uid + '_')) && ($record.matches(/^[A-Za-z0-9_-]{1,170}$/)) && (newData.child('owner').val() === auth.uid) && (newData.child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.child('unit').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('unit').val()) && (newData.child('createdAt').val() === now))",
+            ".validate": "(newData.hasChildren(['owner','author','unit','createdAt','text','community']))",
+            "owner": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && !newData.val().matches(/^ *$/)"
+            },
+            "author": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "unit": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1000 && !newData.val().matches(/^ *$/)"
+            },
+            "community": {
+              ".validate": "newData.val() === $community"
+            },
+            "$extra": {
+              ".validate": false
+            }
+          }
+        },
+        "marketplace": {
+          ".read": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((query.orderByChild === 'createdAt') && (query.limitToLast != null && query.limitToLast <= 100))",
+          ".indexOn": [
+            "createdAt"
+          ],
+          "$record": {
+            ".read": "((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())",
+            ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (!data.exists() || data.child('owner').val() === auth.uid)) && (((!data.exists()) && (newData.exists()) && ($record.beginsWith(auth.uid + '_')) && ($record.matches(/^[A-Za-z0-9_-]{1,170}$/)) && (newData.child('owner').val() === auth.uid) && (newData.child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.child('unit').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('unit').val()) && (newData.child('createdAt').val() === now)) || ((data.exists()) && ((!newData.exists()) || (((newData.child('owner').val() === data.child('owner').val()) && (newData.child('author').val() === data.child('author').val()) && (newData.child('unit').val() === data.child('unit').val()) && (newData.child('createdAt').val() === data.child('createdAt').val()))))))",
+            ".validate": "(newData.hasChildren(['owner','author','unit','createdAt','title','description','price','category','status']))",
+            "owner": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && !newData.val().matches(/^ *$/)"
+            },
+            "author": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "unit": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "description": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1500 && !newData.val().matches(/^ *$/)"
+            },
+            "price": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 1000000000"
+            },
+            "category": {
+              ".validate": "(newData.val() === 'home') || (newData.val() === 'technology') || (newData.val() === 'clothing') || (newData.val() === 'services') || (newData.val() === 'other')"
+            },
+            "status": {
+              ".validate": "(newData.val() === 'available') || (newData.val() === 'reserved') || (newData.val() === 'sold')"
+            },
+            "$extra": {
+              ".validate": false
+            }
+          }
+        },
+        "announcements": {
+          ".read": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((query.orderByChild === 'createdAt') && (query.limitToLast != null && query.limitToLast <= 100))",
+          ".indexOn": [
+            "createdAt"
+          ],
+          "$record": {
+            ".read": "((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())",
+            ".write": "(((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (((!data.exists()) && (newData.exists()) && ($record.beginsWith(auth.uid + '_')) && ($record.matches(/^[A-Za-z0-9_-]{1,170}$/)) && (newData.child('owner').val() === auth.uid) && (newData.child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.child('unit').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('unit').val()) && (newData.child('createdAt').val() === now)) || ((data.exists()) && ((!newData.exists()) || (((newData.child('owner').val() === data.child('owner').val()) && (newData.child('author').val() === data.child('author').val()) && (newData.child('unit').val() === data.child('unit').val()) && (newData.child('createdAt').val() === data.child('createdAt').val())) && ((newData.child('notificationDispatchedAt').val() === data.child('notificationDispatchedAt').val()))))))) && (data.exists() || !newData.child('notificationDispatchedAt').exists())",
+            ".validate": "(newData.hasChildren(['owner','author','unit','createdAt','title','description','priority','status']))",
+            "owner": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && !newData.val().matches(/^ *$/)"
+            },
+            "author": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "unit": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "description": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 3000 && !newData.val().matches(/^ *$/)"
+            },
+            "priority": {
+              ".validate": "(newData.val() === 'info') || (newData.val() === 'important') || (newData.val() === 'urgent')"
+            },
+            "status": {
+              ".validate": "(newData.val() === 'published')"
+            },
+            "notificationDispatchedAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "$extra": {
+              ".validate": false
+            }
+          }
+        },
+        "alerts": {
+          ".read": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((query.orderByChild === 'createdAt') && (query.limitToLast != null && query.limitToLast <= 100))",
+          ".indexOn": [
+            "createdAt"
+          ],
+          "$record": {
+            ".read": "((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())",
+            ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((!data.exists()) && (newData.exists()) && ($record.beginsWith(auth.uid + '_')) && ($record.matches(/^[A-Za-z0-9_-]{1,170}$/)) && (newData.child('owner').val() === auth.uid) && (newData.child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.child('unit').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('unit').val()) && (newData.child('createdAt').val() === now)) && (newData.child('status').val() === 'active') && (newData.child('delivery').val() === 'pending') && (!newData.child('statusChangedAt').exists()) && (!newData.child('statusChangedBy').exists()) && (!newData.child('brokerAcknowledgedAt').exists())) || (((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (data.exists()) && (newData.exists()) && ((newData.child('owner').val() === data.child('owner').val()) && (newData.child('author').val() === data.child('author').val()) && (newData.child('unit').val() === data.child('unit').val()) && (newData.child('createdAt').val() === data.child('createdAt').val())) && ((newData.child('category').val() === data.child('category').val()) && (newData.child('description').val() === data.child('description').val()) && (newData.child('community').val() === data.child('community').val()) && (newData.child('delivery').val() === data.child('delivery').val()) && (newData.child('brokerAcknowledgedAt').val() === data.child('brokerAcknowledgedAt').val())) && (data.child('status').val() !== 'closed') && (newData.child('status').val() !== 'active') && (newData.child('statusChangedAt').val() === now) && (newData.child('statusChangedBy').val() === auth.uid))",
+            ".validate": "(newData.hasChildren(['owner','author','unit','createdAt','category','description','community','status','delivery']))",
+            "owner": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && !newData.val().matches(/^ *$/)"
+            },
+            "author": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "unit": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "category": {
+              ".validate": "(newData.val() === 'security') || (newData.val() === 'fire') || (newData.val() === 'accident') || (newData.val() === 'medical') || (newData.val() === 'other')"
+            },
+            "description": {
+              ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 1000"
+            },
+            "community": {
+              ".validate": "newData.val() === $community"
+            },
+            "status": {
+              ".validate": "(newData.val() === 'active') || (newData.val() === 'attended') || (newData.val() === 'closed')"
+            },
+            "delivery": {
+              ".validate": "(newData.val() === 'pending') || (newData.val() === 'published')"
+            },
+            "statusChangedAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "statusChangedBy": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && !newData.val().matches(/^ *$/)"
+            },
+            "brokerAcknowledgedAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "$extra": {
+              ".validate": false
+            }
+          }
+        },
+        "reports": {
+          ".read": "(((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && ((query.orderByChild === 'createdAt') && (query.limitToLast != null && query.limitToLast <= 100))) || ((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (query.orderByChild === 'owner') && (query.equalTo === auth.uid || (query.startAt === auth.uid && query.endAt === auth.uid)) && (query.limitToLast != null && query.limitToLast <= 100))",
+          ".indexOn": [
+            "createdAt",
+            "owner"
+          ],
+          "$record": {
+            ".read": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) || ((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (data.child('owner').val() === auth.uid))",
+            ".write": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((!data.exists()) && (newData.exists()) && ($record.beginsWith(auth.uid + '_')) && ($record.matches(/^[A-Za-z0-9_-]{1,170}$/)) && (newData.child('owner').val() === auth.uid) && (newData.child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.child('unit').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('unit').val()) && (newData.child('createdAt').val() === now)) && (newData.child('status').val() === 'pending') && (!newData.child('lastChangeId').exists()) && (!newData.child('history').exists())",
+            ".validate": "(newData.hasChildren(['owner','author','unit','createdAt','title','description','location','status','category']))",
+            "owner": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && !newData.val().matches(/^ *$/)"
+            },
+            "author": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "unit": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "description": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 2000 && !newData.val().matches(/^ *$/)"
+            },
+            "location": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120 && !newData.val().matches(/^ *$/)"
+            },
+            "status": {
+              ".validate": "(newData.val() === 'pending') || (newData.val() === 'working') || (newData.val() === 'resolved')",
+              ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (data.parent().exists()) && (newData.parent().exists()) && (newData.parent().child('lastChangeId').val() === newData.parent().child('lastChangeId').val()) && (!data.parent().child('history').child(newData.parent().child('lastChangeId').val()).exists()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).exists()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).child('status').val() === newData.parent().child('status').val()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).child('createdAt').val() === now)"
+            },
+            "category": {
+              ".validate": "(newData.val() === 'lighting') || (newData.val() === 'cleaning') || (newData.val() === 'leak') || (newData.val() === 'elevator') || (newData.val() === 'garden') || (newData.val() === 'security') || (newData.val() === 'other')"
+            },
+            "lastChangeId": {
+              ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,120}$/)",
+              ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (data.parent().exists()) && (newData.parent().exists()) && (newData.parent().child('lastChangeId').val() === newData.parent().child('lastChangeId').val()) && (!data.parent().child('history').child(newData.parent().child('lastChangeId').val()).exists()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).exists()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).child('status').val() === newData.parent().child('status').val()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.parent().child('history').child(newData.parent().child('lastChangeId').val()).child('createdAt').val() === now)"
+            },
+            "history": {
+              "$changeId": {
+                ".write": "($changeId.matches(/^[A-Za-z0-9_-]{1,120}$/)) && (((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (data.parent().parent().exists()) && (newData.parent().parent().exists()) && (newData.parent().parent().child('lastChangeId').val() === $changeId) && (!data.parent().parent().child('history').child($changeId).exists()) && (newData.parent().parent().child('history').child($changeId).exists()) && (newData.parent().parent().child('history').child($changeId).child('status').val() === newData.parent().parent().child('status').val()) && (newData.parent().parent().child('history').child($changeId).child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.parent().parent().child('history').child($changeId).child('createdAt').val() === now))",
+                ".validate": "(newData.hasChildren(['status','note','author','createdAt'])) && (newData.child('status').val() !== 'resolved' || !newData.child('note').val().matches(/^ *$/))",
+                "status": {
+                  ".validate": "(newData.val() === 'pending') || (newData.val() === 'working') || (newData.val() === 'resolved')"
+                },
+                "note": {
+                  ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 1500"
+                },
+                "author": {
+                  ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+                },
+                "createdAt": {
+                  ".validate": "newData.val() === now"
+                },
+                "$extra": {
+                  ".validate": false
+                }
+              }
+            },
+            "$extra": {
+              ".validate": false
+            }
+          }
+        },
+        "polls": {
+          ".read": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && ((query.orderByChild === 'createdAt') && (query.limitToLast != null && query.limitToLast <= 100))",
+          ".indexOn": [
+            "createdAt"
+          ],
+          "$record": {
+            ".read": "((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())",
+            ".write": "(((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && ((!data.exists()) && (newData.exists()) && ($record.beginsWith(auth.uid + '_')) && ($record.matches(/^[A-Za-z0-9_-]{1,170}$/)) && (newData.child('owner').val() === auth.uid) && (newData.child('author').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('name').val()) && (newData.child('unit').val() === root.child('communityData').child($community).child('members').child(auth.uid).child('unit').val()) && (newData.child('createdAt').val() === now))) && (newData.child('closed').val() === false) && (newData.child('sparkVersion').val() === 1)",
+            ".validate": "(newData.hasChildren(['owner','author','unit','createdAt','title','options','closesAt','showResults','closed']))",
+            "owner": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 128 && !newData.val().matches(/^ *$/)"
+            },
+            "author": {
+              ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+            },
+            "unit": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 30 && !newData.val().matches(/^ *$/)"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 150 && !newData.val().matches(/^ *$/)"
+            },
+            "options": {
+              "0": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+              },
+              "1": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)"
+              },
+              "2": {
+                ".validate": "(newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)) && (newData.parent().child('1').exists())"
+              },
+              "3": {
+                ".validate": "(newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)) && (newData.parent().child('2').exists())"
+              },
+              "4": {
+                ".validate": "(newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)) && (newData.parent().child('3').exists())"
+              },
+              "5": {
+                ".validate": "(newData.isString() && newData.val().length >= 1 && newData.val().length <= 100 && !newData.val().matches(/^ *$/)) && (newData.parent().child('4').exists())"
+              },
+              ".validate": "newData.hasChildren(['0','1'])",
+              "$extra": {
+                ".validate": false
+              }
+            },
+            "closesAt": {
+              ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 1 && newData.val() <= 9007199254740991 && newData.val() >= now + 60000 && newData.val() <= now + 7776000000"
+            },
+            "showResults": {
+              ".validate": "newData.isBoolean()"
+            },
+            "closed": {
+              ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) && (data.val() === false) && (newData.val() === true)",
+              ".validate": "newData.isBoolean()"
+            },
+            "sparkVersion": {
+              ".validate": "newData.val() === 1"
+            },
+            "$extra": {
+              ".validate": false
+            }
+          }
+        },
+        "pollLedger": {
+          "$poll": {
+            "votes": {
+              "$uid": {
+                ".read": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.uid === $uid)",
+                ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (root.child('communityData').child($community).child('polls').child($poll).child('sparkVersion').val() === 1) && (root.child('communityData').child($community).child('polls').child($poll).child('closed').val() === false) && (now < root.child('communityData').child($community).child('polls').child($poll).child('closesAt').val())) && (auth.uid === $uid) && (!data.exists()) && (newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 5) && (root.child('communityData').child($community).child('polls').child($poll).child('options').child((newData.val() + '')).exists()) && (((!root.child('communityData').child($community).child('pollTotals').child($poll).child((newData.val() + '')).exists()) && (newData.parent().parent().parent().parent().child('pollTotals').child($poll).child((newData.val() + '')).val() === 1)) || ((root.child('communityData').child($community).child('pollTotals').child($poll).child((newData.val() + '')).isNumber()) && (newData.parent().parent().parent().parent().child('pollTotals').child($poll).child((newData.val() + '')).val() === root.child('communityData').child($community).child('pollTotals').child($poll).child((newData.val() + '')).val() + 1)))"
+              }
+            }
+          }
+        },
+        "pollTotals": {
+          "$poll": {
+            ".read": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (root.child('communityData').child($community).child('polls').child($poll).child('sparkVersion').val() === 1) && (((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.token.role === 'admin') && (auth.token.community === $community) && (root.child('accounts').child(auth.uid).child('role').val() === 'admin')) || (root.child('communityData').child($community).child('polls').child($poll).child('showResults').val() === true))",
+            "$choice": {
+              ".write": "((((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (root.child('communityData').child($community).child('polls').child($poll).child('sparkVersion').val() === 1) && (root.child('communityData').child($community).child('polls').child($poll).child('closed').val() === false) && (now < root.child('communityData').child($community).child('polls').child($poll).child('closesAt').val())) && (root.child('communityData').child($community).child('polls').child($poll).child('options').child($choice).exists()) && (!root.child('communityData').child($community).child('pollLedger').child($poll).child('votes').child(auth.uid).exists()) && ((newData.parent().parent().parent().child('pollLedger').child($poll).child('votes').child(auth.uid).val() + '') === $choice) && (((!data.exists()) && (newData.val() === 1)) || ((data.isNumber()) && (newData.val() === data.val() + 1)))"
+            }
+          }
+        },
+        "devices": {
+          "$uid": {
+            "$hash": {
+              ".write": "(((auth != null) && (auth.token.email_verified === true)) && (root.child('accounts').child(auth.uid).child('community').val() === $community) && (root.child('communityData').child($community).child('members').child(auth.uid).child('active').val() === true) && (root.child('communityData').child($community).child('members').child(auth.uid).child('role').val() === root.child('accounts').child(auth.uid).child('role').val())) && (auth.uid === $uid) && ($hash.matches(/^[a-f0-9]{64}$/))",
+              ".validate": "(newData.hasChildren(['token','updatedAt']))",
+              "token": {
+                ".validate": "newData.isString() && newData.val().length >= 16 && newData.val().length <= 4096 && !newData.val().matches(/^ *$/)"
+              },
+              "updatedAt": {
+                ".validate": "newData.val() === now"
+              },
+              "$extra": {
+                ".validate": false
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

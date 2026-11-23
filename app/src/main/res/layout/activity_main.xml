@@ -1,0 +1,22 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:minHeight="56dp" android:background="@color/panel"
+        app:titleTextColor="@color/ink" android:visibility="gone" />
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/screen" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1" />
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:visibility="gone"
+        android:background="@color/panel" app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_navigation" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/navigation_expanded" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginHorizontal="16dp"
+        android:minHeight="48dp" android:visibility="gone" android:singleLine="false"
+        app:icon="@drawable/ic_more" />
+</LinearLayout>

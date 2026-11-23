@@ -1,0 +1,7 @@
+<resources>
+    <item name="auth_name" type="id" />
+    <item name="auth_unit" type="id" />
+    <item name="auth_email" type="id" />
+    <item name="auth_password" type="id" />
+    <item name="auth_confirmation" type="id" />
+</resources>
