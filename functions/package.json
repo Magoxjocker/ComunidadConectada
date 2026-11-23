@@ -10,7 +10,8 @@
     "test:flows": "node --test --test-force-exit --test-concurrency=1 integration/flows.test.js integration/provision-admin.test.js",
     "admin": "node provision-admin.js",
     "spark:rules": "node generate-spark-rules.js",
-    "spark:delivery": "node spark-delivery.js"
+    "spark:delivery": "node spark-delivery.js",
+    "spark:delivery:watch": "node spark-local-delivery.js"
   },
   "dependencies": {
     "firebase-admin": "14.5.1",

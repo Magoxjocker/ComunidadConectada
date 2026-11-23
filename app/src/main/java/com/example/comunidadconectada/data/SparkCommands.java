@@ -10,9 +10,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -178,8 +175,10 @@ final class SparkCommands {
     }
 
     private Task<Map<?, ?>> saveDevice(Membership actor, Map<String, Object> fields) {
+        if (fields.containsKey("expectedUid") && (!actor.uid().equals(fields.get("expectedUid"))
+                || !actor.community().equals(fields.get("expectedCommunity")))) return denied();
         String token = string(fields, "token");
-        String path = "devices/" + actor.uid() + "/" + tokenHash(token);
+        String path = "devices/" + actor.uid() + "/" + FcmTokenFingerprint.sha256(token);
         if (!bool(fields, "enabled")) {
             Map<String, Object> changes = new LinkedHashMap<>();
             changes.put(actor.path(path), null);
@@ -249,20 +248,6 @@ final class SparkCommands {
             labels.add(label.trim());
         }
         return labels;
-    }
-
-    private static String tokenHash(String token) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(digest.length * 2);
-            for (byte octet : digest) {
-                hex.append(Character.forDigit((octet & 0xff) >>> 4, 16));
-                hex.append(Character.forDigit(octet & 0x0f, 16));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("SHA-256 no está disponible.", exception);
-        }
     }
 
     private record Membership(String uid, String community, DataSnapshot profile, DatabaseReference reference) {

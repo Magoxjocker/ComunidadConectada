@@ -58,6 +58,8 @@ public final class MenuFragment extends PanelFragment {
         Ui.button(binding.actions,
                 CommunityMessagingService.allowed(requireContext()) ? R.string.notifications_settings : R.string.notifications_enable,
                 R.drawable.ic_announce, host()::notificationSettings);
+        Ui.button(binding.actions, R.string.fcm_diagnostics, R.drawable.ic_tools,
+                () -> FcmDiagnosticsDialog.open(getChildFragmentManager()));
         signOut();
     }
 

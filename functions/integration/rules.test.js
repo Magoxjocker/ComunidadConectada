@@ -3,7 +3,7 @@ const { after, before, test } = require("node:test");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const { initializeTestEnvironment, assertSucceeds, assertFails } = require("@firebase/rules-unit-testing");
-const { get, ref, set, query, orderByChild, orderByKey, limitToFirst, limitToLast, equalTo, startAt, endAt } = require("firebase/database");
+const { get, ref, set, query, orderByChild, orderByKey, limitToFirst, limitToLast, equalTo, startAt, endAt, serverTimestamp } = require("firebase/database");
 
 const projectId = process.env.GCLOUD_PROJECT || "demo-comunidad";
 let environment;
@@ -23,7 +23,7 @@ before(async () => {
         rulesNorth: {
           metadata: { displayName: "Comunidad Norte", internal: "fixture privado" },
           members: {
-            rulesNeighbor: { role: "neighbor", active: true }, rulesAdmin: { role: "admin", active: true },
+            rulesNeighbor: { role: "neighbor", active: true }, rulesAdmin: { role: "admin", active: true, name: "Admin fixture", unit: "101" },
             blocked: { role: "neighbor", active: false }
           },
           messages: { message: { createdAt: 10, owner: "rulesNeighbor" } },
@@ -103,4 +103,21 @@ test("protege reportes privados y boletas individuales", async () => {
   await assertFails(get(ref(neighbor, `${base}/pollLedger/poll/votes/rulesAdmin`)));
   assert.equal((await assertSucceeds(get(ref(neighbor, `${base}/pollLedger/poll/votes/rulesNeighbor`)))).val(), 0);
   await assertFails(set(ref(neighbor, `${base}/pollLedger/poll/votes/rulesNeighbor`), 1));
+});
+
+
+test("publica avisos normales e importantes y autoriza la apertura solo dentro de su comunidad", async () => {
+  const admin = database("rulesAdmin", { role: "admin", community: "rulesNorth" });
+  const neighbor = database("rulesNeighbor");
+  const outsider = database("rulesOther");
+  const base = "communityData/rulesNorth/announcements";
+  for (const priority of ["info", "important", "urgent"]) {
+    const destination = base + "/rulesAdmin_" + priority;
+    await assertSucceeds(set(ref(admin, destination), { owner: "rulesAdmin", author: "Admin fixture",
+      unit: "101", createdAt: serverTimestamp(), title: "Aviso de prueba", description: "Contenido",
+      priority, status: "published" }));
+    assert.equal((await assertSucceeds(get(ref(neighbor, destination)))).child("priority").val(), priority);
+    await assertFails(get(ref(outsider, destination)));
+  }
+  assert.equal((await assertSucceeds(get(ref(neighbor, base + "/announcement")))).child("title").val(), "Aviso");
 });
